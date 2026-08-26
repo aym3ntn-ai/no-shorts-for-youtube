@@ -5,13 +5,18 @@
     <style>
       body {
         font-family: -apple-system, system-ui, sans-serif;
-        width: 220px;
+        width: 260px;
         padding: 14px;
         margin: 0;
       }
       h1 {
         font-size: 14px;
         margin: 0 0 10px;
+      }
+      h2 {
+        font-size: 12px;
+        margin: 14px 0 4px;
+        color: #333;
       }
       label {
         display: flex;
@@ -25,6 +30,21 @@
         color: #666;
         margin: 10px 0 0;
       }
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        height: 90px;
+        font-size: 12px;
+        font-family: inherit;
+        resize: vertical;
+        padding: 6px;
+      }
+      .status {
+        font-size: 11px;
+        color: #1a7f37;
+        height: 14px;
+        margin-top: 4px;
+      }
     </style>
   </head>
   <body>
@@ -34,6 +54,12 @@
       <input type="checkbox" id="toggle" />
     </label>
     <p>Hides Shorts across YouTube and redirects you home if you land on a Shorts link.</p>
+
+    <h2>Blocked titles (one per line)</h2>
+    <textarea id="keywords" placeholder="Breaking Bad&#10;The Mentalist&#10;Suits"></textarea>
+    <div class="status" id="status"></div>
+    <p>Videos whose title contains any of these are hidden from feeds/search, and watch pages redirect home.</p>
+
     <script src="popup.js"></script>
   </body>
 </html>

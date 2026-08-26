@@ -1,4 +1,6 @@
 const STORAGE_KEY = "noShortsEnabled";
+const KEYWORDS_KEY = "blockedKeywords";
+const DEFAULT_KEYWORDS = ["Breaking Bad", "The Mentalist", "Suits"];
 
 function isShortsUrl(url) {
   try {
@@ -23,9 +25,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 );
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get([STORAGE_KEY], (res) => {
-    if (res[STORAGE_KEY] === undefined) {
-      chrome.storage.local.set({ [STORAGE_KEY]: true });
+  chrome.storage.local.get([STORAGE_KEY, KEYWORDS_KEY], (res) => {
+    const updates = {};
+    if (res[STORAGE_KEY] === undefined) updates[STORAGE_KEY] = true;
+    if (res[KEYWORDS_KEY] === undefined) updates[KEYWORDS_KEY] = DEFAULT_KEYWORDS;
+    if (Object.keys(updates).length > 0) {
+      chrome.storage.local.set(updates);
     }
   });
 });

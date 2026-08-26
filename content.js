@@ -1,22 +1,44 @@
 (() => {
-  const STORAGE_KEY = "noShortsEnabled";
+  const ENABLED_KEY = "noShortsEnabled";
+  const KEYWORDS_KEY = "blockedKeywords";
+  const DEFAULT_KEYWORDS = ["Breaking Bad", "The Mentalist", "Suits"];
+
   let enabled = true;
+  let keywords = DEFAULT_KEYWORDS;
 
   const SHORTS_HREF = /^\/shorts\//;
+  const HOME_URL = "https://www.youtube.com/";
 
-  function isShortsUrl(url) {
-    try {
-      const u = new URL(url, location.origin);
-      return SHORTS_HREF.test(u.pathname);
-    } catch {
-      return false;
-    }
+  function textMatchesBlocklist(text) {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    return keywords.some((kw) => kw && lower.includes(kw.toLowerCase()));
+  }
+
+  function redirectHome() {
+    location.replace(HOME_URL);
   }
 
   function redirectAwayFromShorts() {
     if (!enabled) return;
     if (SHORTS_HREF.test(location.pathname)) {
-      location.replace("https://www.youtube.com/");
+      redirectHome();
+    }
+  }
+
+  function redirectAwayFromBlockedShow() {
+    if (!enabled) return;
+    if (location.pathname !== "/watch") return;
+
+    const heading = document.querySelector(
+      "h1.ytd-watch-metadata yt-formatted-string, ytd-watch-metadata h1 yt-formatted-string, h1.title yt-formatted-string"
+    );
+    const title =
+      (heading && heading.textContent) ||
+      document.title.replace(/ - YouTube$/, "");
+
+    if (textMatchesBlocklist(title)) {
+      redirectHome();
     }
   }
 
@@ -29,8 +51,12 @@
     "YTD-GRID-VIDEO-RENDERER",
     "YTD-COMPACT-VIDEO-RENDERER",
     "YTD-REEL-ITEM-RENDERER",
+    "YTD-PLAYLIST-VIDEO-RENDERER",
+    "YTD-PLAYLIST-PANEL-VIDEO-RENDERER",
+    "YTD-COMPACT-PLAYLIST-RENDERER",
     "YTM-SHORTS-LOCKUP-VIEW-MODEL",
     "YT-SHORTS-LOCKUP-VIEW-MODEL",
+    "YT-LOCKUP-VIEW-MODEL",
   ]);
 
   function hideCardFor(el) {
@@ -45,6 +71,22 @@
       depth++;
     }
     el.style.setProperty("display", "none", "important");
+  }
+
+  const TITLE_SELECTORS = [
+    "#video-title",
+    "a#video-title-link",
+    ".yt-lockup-metadata-view-model-wiz__title",
+  ].join(", ");
+
+  function hideBlockedTitles() {
+    if (keywords.length === 0) return;
+    document.querySelectorAll(TITLE_SELECTORS).forEach((el) => {
+      const text = el.getAttribute("title") || el.textContent || "";
+      if (textMatchesBlocklist(text)) {
+        hideCardFor(el);
+      }
+    });
   }
 
   function sweep() {
@@ -75,6 +117,14 @@
         tab.style.setProperty("display", "none", "important");
       }
     });
+
+    hideBlockedTitles();
+  }
+
+  function guard() {
+    redirectAwayFromShorts();
+    redirectAwayFromBlockedShow();
+    sweep();
   }
 
   function patchHistory() {
@@ -93,20 +143,13 @@
     };
     window.addEventListener("popstate", fire);
     window.addEventListener("yt-navigate-finish", fire);
-    window.addEventListener("noshorts:navigate", () => {
-      redirectAwayFromShorts();
-      sweep();
-    });
+    window.addEventListener("noshorts:navigate", guard);
   }
 
   function start() {
-    redirectAwayFromShorts();
-    sweep();
+    guard();
 
-    const observer = new MutationObserver(() => {
-      redirectAwayFromShorts();
-      sweep();
-    });
+    const observer = new MutationObserver(guard);
     observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
@@ -116,8 +159,11 @@
   patchHistory();
 
   if (chrome?.storage?.local) {
-    chrome.storage.local.get([STORAGE_KEY], (res) => {
-      enabled = res[STORAGE_KEY] !== false;
+    chrome.storage.local.get([ENABLED_KEY, KEYWORDS_KEY], (res) => {
+      enabled = res[ENABLED_KEY] !== false;
+      keywords = Array.isArray(res[KEYWORDS_KEY])
+        ? res[KEYWORDS_KEY]
+        : DEFAULT_KEYWORDS;
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", start);
       } else {
@@ -126,14 +172,23 @@
     });
 
     chrome.storage.onChanged.addListener((changes) => {
-      if (STORAGE_KEY in changes) {
-        enabled = changes[STORAGE_KEY].newValue !== false;
-        if (enabled) {
-          sweep();
-          redirectAwayFromShorts();
-        } else {
-          location.reload();
-        }
+      let shouldReload = false;
+
+      if (ENABLED_KEY in changes) {
+        const wasEnabled = enabled;
+        enabled = changes[ENABLED_KEY].newValue !== false;
+        if (wasEnabled && !enabled) shouldReload = true;
+      }
+      if (KEYWORDS_KEY in changes) {
+        keywords = Array.isArray(changes[KEYWORDS_KEY].newValue)
+          ? changes[KEYWORDS_KEY].newValue
+          : DEFAULT_KEYWORDS;
+      }
+
+      if (shouldReload) {
+        location.reload();
+      } else {
+        guard();
       }
     });
   } else {

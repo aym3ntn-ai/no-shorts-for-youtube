@@ -5,7 +5,7 @@
 <h1 align="center">No Shorts for YouTube</h1>
 
 <p align="center">
-  A small Firefox extension that hides YouTube Shorts everywhere and blocks direct navigation to Shorts pages.
+  A small Firefox extension that hides YouTube Shorts and any videos you don't want to see, then blocks direct navigation to their pages.
 </p>
 
 <p align="center">
@@ -22,7 +22,9 @@ YouTube Shorts is everywhere on the site now — the home feed, the sidebar,
 search results, channel pages — and there's no built-in way to turn it off.
 This extension removes it from the UI and stops you from ever landing on a
 Shorts URL, whether you clicked a link, typed one, or YouTube's own
-single-page app tried to route you there.
+single-page app tried to route you there. It does the same for any video
+whose title matches a list of shows you'd rather not stumble into — handy
+for avoiding spoilers or steering clear of a show entirely.
 
 ## Features
 
@@ -32,6 +34,12 @@ single-page app tried to route you there.
 - **Blocks Shorts navigation**: any attempt to open a `/shorts/...` URL —
   typed, clicked, bookmarked, or triggered by YouTube's client-side
   router — redirects back to youtube.com.
+- **Blocks videos by title**: maintain a list of show names or keywords
+  (e.g. `Breaking Bad`, `The Mentalist`, `Suits`) from the popup. Any video
+  tile whose title contains one, anywhere on the site, is hidden; if you
+  land directly on a matching watch page, it redirects home. Matching is
+  case-insensitive and matches substrings, so `Suits` also catches spinoffs
+  like `Suits: LA`.
 - **Survives YouTube's SPA routing**: a `MutationObserver` plus a patched
   `history.pushState`/`popstate` listener re-run the hiding logic every time
   YouTube navigates without a full page reload.
@@ -69,16 +77,24 @@ Developer Edition or Nightly by setting `xpinstall.signatures.required` to
 
 ## Usage
 
-Click the toolbar icon and flip **Block Shorts** to enable or disable the
-extension without removing it.
+Click the toolbar icon to open the popup:
+
+- Flip **Block Shorts** to enable or disable the whole extension.
+- Edit the **Blocked titles** box, one show or keyword per line. It saves
+  automatically as you type (debounced) and on blur.
 
 ## How it works
 
 | File | Role |
 |---|---|
-| `content.js` / `content.css` | Hide Shorts shelves, sidebar entries, grid tiles, and the channel "Shorts" tab. Re-run on every SPA navigation. |
-| `background.js` | Uses `webNavigation.onBeforeNavigate` to catch direct navigations to `/shorts/...` and redirect the tab before it loads. |
-| `popup.html` / `popup.js` | Toolbar toggle, backed by `chrome.storage.local`, read by both scripts above. |
+| `content.js` / `content.css` | Hide Shorts shelves, sidebar entries, grid tiles, the channel "Shorts" tab, and any video tile whose title matches the blocked-titles list. Redirect home from a Shorts page or a matching watch page. Re-run on every SPA navigation. |
+| `background.js` | Uses `webNavigation.onBeforeNavigate` to catch direct navigations to `/shorts/...` and redirect the tab before it loads. Seeds the default blocked-titles list on install. |
+| `popup.html` / `popup.js` | Toolbar toggle and blocked-titles editor, backed by `chrome.storage.local`, read by both scripts above. |
+
+Title matching happens in the content script after the page's title element
+is available, since neither the URL nor `webNavigation` can tell us a
+video's title before it loads — so a blocked watch page can flash briefly
+before the redirect fires.
 
 ## Permissions
 

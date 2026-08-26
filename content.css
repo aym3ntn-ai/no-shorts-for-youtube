@@ -1,0 +1,43 @@
+/* No Shorts for YouTube — CSS-only fast path.
+   Covers the DOM shapes YouTube uses today; content.js is the robust
+   fallback since YouTube changes markup often and loads content via SPA. */
+
+/* Sidebar "Shorts" entry (expanded + mini guide) */
+ytd-guide-entry-renderer:has(a[title="Shorts"]),
+ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+tp-yt-paper-item:has(> yt-icon[icon="yt-icons:shorts"]) {
+  display: none !important;
+}
+
+/* Shorts shelves on home / subscriptions / search */
+ytd-rich-shelf-renderer[is-shorts],
+ytd-reel-shelf-renderer,
+ytd-shorts-shelf-renderer {
+  display: none !important;
+}
+
+/* Individual Shorts items inside a grid (home, search, channel) */
+ytd-rich-item-renderer:has(ytd-reel-item-renderer),
+ytd-video-renderer:has(a[href^="/shorts/"]),
+ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+ytd-compact-video-renderer:has(a[href^="/shorts/"]) {
+  display: none !important;
+}
+
+/* New thumbnail lockup component YouTube uses for Shorts as of 2024+ */
+ytm-shorts-lockup-view-model,
+yt-shorts-lockup-view-model,
+:has(> ytm-shorts-lockup-view-model),
+ytd-rich-item-renderer:has(ytm-shorts-lockup-view-model) {
+  display: none !important;
+}
+
+/* "Shorts" tab on a channel page is text-matched in content.js
+   (no reliable CSS-only selector exists for it). */
+
+/* Shorts player page itself */
+ytd-shorts,
+#shorts-container,
+ytd-reel-video-renderer {
+  display: none !important;
+}

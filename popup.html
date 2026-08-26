@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: -apple-system, system-ui, sans-serif;
+        width: 220px;
+        padding: 14px;
+        margin: 0;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0 0 10px;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      p {
+        font-size: 11px;
+        color: #666;
+        margin: 10px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>No Shorts for YouTube</h1>
+    <label>
+      Block Shorts
+      <input type="checkbox" id="toggle" />
+    </label>
+    <p>Hides Shorts across YouTube and redirects you home if you land on a Shorts link.</p>
+    <script src="popup.js"></script>
+  </body>
+</html>

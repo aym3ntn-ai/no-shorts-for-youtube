@@ -54,13 +54,24 @@ YouTube-app data it keeps is a short list of Shorts-related view id *names*
 There's no Play Store build: Google restricts accessibility-service apps on the
 Play Store, and this is a personal sideload.
 
-### Option A — download a build from CI
+### Option A — download a signed release
 
-Every push builds a debug APK. Open the repository's **Actions** tab, pick the
-latest **Android** run, and download the `no-shorts-debug-apk` artifact. Unzip
-it and transfer the `.apk` to your phone.
+Tagged versions (`vX.Y.Z`) are built, signed, and published to the repo's
+[Releases](https://github.com/aym3ntn-ai/no-shorts-for-youtube/releases) page
+by [`android-release.yml`](../.github/workflows/android-release.yml). Grab the
+`.apk` from the latest release and transfer it to your phone — this is the
+one to use if you're not building from source, since every release shares the
+same signing key and can install over the previous one.
 
-### Option B — build it yourself
+### Option B — download a debug build from CI
+
+Every push to `android/**` also builds an unsigned debug APK for quick
+testing. Open the repository's **Actions** tab, pick the latest **Android**
+run, and download the `no-shorts-debug-apk` artifact. A debug build can't be
+installed over a release build (different signing key) without uninstalling
+first.
+
+### Option C — build it yourself
 
 Requires JDK 17+ and the Android SDK (platform 35). Android Studio has both.
 
@@ -136,6 +147,23 @@ cd android
 | [`BlockController.kt`](detector/src/main/kotlin/com/noshorts/detector/BlockController.kt) | Rate limiting and Back → Home escalation. |
 | [`ShortsBlockerService.kt`](app/src/main/java/com/noshorts/android/ShortsBlockerService.kt) | The accessibility service and tree walk. |
 | [`MainActivity.kt`](app/src/main/java/com/noshorts/android/MainActivity.kt) | Settings, status and diagnostics screen. |
+
+## Releasing
+
+Push a tag matching `vX.Y.Z` and [`android-release.yml`](../.github/workflows/android-release.yml)
+builds `:app:assembleRelease`, signs it with the release keystore stored in
+the repo's Actions secrets (`ANDROID_KEYSTORE_BASE64` and friends — see
+`app/build.gradle.kts` for how they're wired into the signing config), and
+publishes the APK to a new GitHub Release with generated notes:
+
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+Bump `versionCode`/`versionName` in `app/build.gradle.kts` first. The
+signing key is only ever stored as an encrypted GitHub Actions secret and a
+local backup — it's never committed to the repo.
 
 ## Known limits
 

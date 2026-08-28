@@ -15,10 +15,33 @@ android {
         versionName = "1.0.0"
     }
 
+    // CI provides these as a base64-encoded PKCS12 keystore (see
+    // .github/workflows/android-release.yml). Local debug/lint builds skip
+    // signing entirely when they're unset.
+    val releaseKeystoreBase64 = System.getenv("ANDROID_KEYSTORE_BASE64")
+    signingConfigs {
+        if (releaseKeystoreBase64 != null) {
+            create("release") {
+                val keystoreFile = File.createTempFile("release-signing", ".p12")
+                keystoreFile.writeBytes(java.util.Base64.getDecoder().decode(releaseKeystoreBase64))
+                keystoreFile.deleteOnExit()
+
+                storeFile = keystoreFile
+                storeType = "PKCS12"
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (releaseKeystoreBase64 != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

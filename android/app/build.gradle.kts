@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -23,7 +25,7 @@ android {
         if (releaseKeystoreBase64 != null) {
             create("release") {
                 val keystoreFile = File.createTempFile("release-signing", ".p12")
-                keystoreFile.writeBytes(java.util.Base64.getDecoder().decode(releaseKeystoreBase64))
+                keystoreFile.writeBytes(Base64.getDecoder().decode(releaseKeystoreBase64))
                 keystoreFile.deleteOnExit()
 
                 storeFile = keystoreFile

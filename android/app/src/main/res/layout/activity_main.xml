@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statusCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/statusTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+
+                <TextView
+                    android:id="@+id/statusDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openAccessibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/open_accessibility_settings" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchEnabled"
+            style="@style/Widget.NoShorts.Switch"
+            android:text="@string/setting_enabled" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Summary"
+            android:text="@string/setting_enabled_summary" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchToast"
+            style="@style/Widget.NoShorts.Switch"
+            android:text="@string/setting_toast" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchAggressive"
+            style="@style/Widget.NoShorts.Switch"
+            android:text="@string/setting_aggressive" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Summary"
+            android:text="@string/setting_aggressive_summary" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchLinkTrap"
+            style="@style/Widget.NoShorts.Switch"
+            android:text="@string/setting_link_trap" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Summary"
+            android:text="@string/setting_link_trap_summary" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Section"
+            android:text="@string/section_titles" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchTitles"
+            style="@style/Widget.NoShorts.Switch"
+            android:text="@string/setting_titles" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Summary"
+            android:text="@string/setting_titles_summary" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_titles">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/blockedTitles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:minLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            style="@style/Widget.NoShorts.Section"
+            android:text="@string/section_advanced" />
+
+        <TextView
+            style="@style/Widget.NoShorts.Summary"
+            android:text="@string/markers_summary" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_markers">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/extraMarkers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:minLines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            style="@style/Widget.NoShorts.Section"
+            android:text="@string/observed_title" />
+
+        <TextView
+            android:id="@+id/observedIds"
+            style="@style/Widget.NoShorts.Summary"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/copyIds"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/copy_ids" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/clearIds"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/clear_ids" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/stats"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/resetStats"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reset_stats" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

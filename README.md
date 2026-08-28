@@ -5,11 +5,12 @@
 <h1 align="center">No Shorts for YouTube</h1>
 
 <p align="center">
-  A small Firefox extension that hides YouTube Shorts and any videos you don't want to see, then blocks direct navigation to their pages.
+  Hides YouTube Shorts and any videos you don't want to see, then blocks direct navigation to their pages — in Firefox, and in the native YouTube app on Android.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Firefox%20109%2B-orange" alt="Firefox 109+">
+  <img src="https://img.shields.io/badge/platform-Android%208%2B-3ddc84" alt="Android 8+">
   <img src="https://img.shields.io/badge/manifest-v3-blue" alt="Manifest V3">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
 </p>
@@ -25,6 +26,16 @@ Shorts URL, whether you clicked a link, typed one, or YouTube's own
 single-page app tried to route you there. It does the same for any video
 whose title matches a list of shows you'd rather not stumble into — handy
 for avoiding spoilers or steering clear of a show entirely.
+
+## Two halves
+
+| | |
+|---|---|
+| **Firefox extension** (this folder) | youtube.com in the browser. Hides Shorts from the UI and redirects away from `/shorts/` URLs. |
+| **[Android app](android/)** (`android/`) | The native YouTube app, where an extension can't reach. An accessibility service spots the Shorts player and closes it the moment it opens. |
+
+They're independent — install either or both. The rest of this page covers the
+extension; see [`android/README.md`](android/README.md) for the phone.
 
 ## Features
 
@@ -103,6 +114,18 @@ before the redirect fires.
 | `storage` | Persist the on/off toggle. |
 | `webNavigation` | Detect and redirect navigations to `/shorts/...` before the page loads. |
 | `*://*.youtube.com/*` (host permission) | Run the content script and navigation guard only on YouTube. |
+
+## The Android app
+
+The browser extension can't do anything about the YouTube app on your phone —
+there's no DOM to rewrite and no request worth filtering. The `android/` folder
+holds a small companion app that solves it the only way an unrooted phone
+allows: an accessibility service that watches the YouTube app's view hierarchy
+and presses Back the instant the Shorts player appears.
+
+It requests no Android permissions, makes no network requests, and is scoped to
+the YouTube app alone. Build and install instructions, plus what to do when a
+YouTube update renames things, are in [`android/README.md`](android/README.md).
 
 ## Contributing
 

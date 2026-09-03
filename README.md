@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Firefox%20109%2B-orange" alt="Firefox 109+">
+  <img src="https://img.shields.io/badge/platform-Firefox%20140%2B-orange" alt="Firefox 140+">
   <img src="https://img.shields.io/badge/platform-Android%208%2B-3ddc84" alt="Android 8+">
   <img src="https://img.shields.io/badge/manifest-v3-blue" alt="Manifest V3">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
@@ -70,21 +70,32 @@ extension; see [`android/README.md`](android/README.md) for the phone.
 4. Visit youtube.com — Shorts should be hidden, and any Shorts link/URL
    redirects to the homepage.
 
-### Permanent install
+### Permanent install (signed)
 
-Firefox requires extensions to be signed by Mozilla to install permanently.
-To build a distributable, signed package:
+Firefox only installs signed extensions permanently. Download the `.xpi` from
+the latest `firefox-v*` entry on the
+[Releases](https://github.com/aym3ntn-ai/no-shorts-for-youtube/releases) page
+and open it in Firefox — it's signed by Mozilla, so it installs and stays
+installed.
+
+Releases are built and signed by
+[`firefox-release.yml`](.github/workflows/firefox-release.yml); see
+[Releasing](#releasing) to cut one.
+
+### Build it yourself
 
 ```bash
-npx web-ext build --source-dir .
+npx web-ext lint --source-dir .     # AMO validation
+npx web-ext build --source-dir .    # unsigned zip in web-ext-artifacts/
 ```
 
-Submit the generated zip under `web-ext-artifacts/` at
-[addons.mozilla.org/developers](https://addons.mozilla.org/developers/) for
-signing (choose **On your own** if you don't want it listed publicly), then
-install the signed `.xpi`. Alternatively, load it unsigned in Firefox
-Developer Edition or Nightly by setting `xpinstall.signatures.required` to
-`false` in `about:config`.
+An unsigned build can only be loaded temporarily (`about:debugging`), or
+permanently in Firefox Developer Edition / Nightly with
+`xpinstall.signatures.required` set to `false` in `about:config`.
+
+Both commands read [`web-ext-config.mjs`](web-ext-config.mjs), which keeps the
+Android app, CI config and docs out of the package — without it the `.xpi`
+picks up the whole `android/` tree.
 
 ## Usage
 
@@ -126,6 +137,38 @@ and presses Back the instant the Shorts player appears.
 It requests no Android permissions, makes no network requests, and is scoped to
 the YouTube app alone. Build and install instructions, plus what to do when a
 YouTube update renames things, are in [`android/README.md`](android/README.md).
+
+## Releasing
+
+Releases are signed by Mozilla through the AMO API and published to GitHub
+Releases. One-time setup: create an API credential at
+[addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/en-US/developers/addon/api/key/)
+and add it to the repository as the secrets `WEB_EXT_API_KEY` and
+`WEB_EXT_API_SECRET`.
+
+To cut a release, bump `version` in `manifest.json`, then tag it:
+
+```bash
+git tag firefox-v1.2.0
+git push origin firefox-v1.2.0
+```
+
+The workflow lints, checks the tag agrees with `manifest.json`, signs the
+package, and attaches the signed `.xpi` to a new GitHub Release. The
+`firefox-` prefix keeps these tags distinct from the Android app's `v*.*.*`
+tags, so tagging one never triggers the other's release.
+
+By default it signs on AMO's **unlisted** channel: Mozilla signs the build but
+doesn't host it, which is what makes self-distribution from GitHub Releases
+work. To instead publish the add-on publicly on addons.mozilla.org, run the
+workflow manually from the Actions tab with the `listed` channel — AMO then
+hosts and distributes it, so no `.xpi` is attached to the GitHub Release.
+
+> **Before the first submission:** the add-on's identity on AMO is the
+> `browser_specific_settings.gecko.id` in `manifest.json`, currently
+> `no-shorts@local.extension`. AMO locks that ID to the add-on permanently, so
+> if you want a namespace you actually control, change it *before* the first
+> signed release.
 
 ## Contributing
 

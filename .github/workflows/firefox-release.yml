@@ -1,0 +1,148 @@
+name: Firefox Release
+
+on:
+  # Fully automatic: merge a change to the extension together with a version
+  # bump in manifest.json and a signed release is published. If the version
+  # was already released the run is a no-op (AMO rejects a duplicate version).
+  push:
+    branches: [main]
+    paths:
+      - manifest.json
+      - background.js
+      - content.js
+      - content.css
+      - popup.html
+      - popup.js
+      - icons/**
+      - web-ext-config.mjs
+    tags:
+      # Namespaced so it can't collide with the Android app's `v*.*.*` tags.
+      - "firefox-v*.*.*"
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "AMO channel: unlisted (self-distributed .xpi) or listed (published on addons.mozilla.org)"
+        required: true
+        default: unlisted
+        type: choice
+        options: [unlisted, listed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: firefox-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CHANNEL: ${{ inputs.channel || 'unlisted' }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The release tag is always derived from manifest.json, so a manual run,
+      # a push to main and a pushed tag all agree on one name.
+      - name: Resolve the version to release
+        id: ver
+        run: |
+          version=$(node -p "require('./manifest.json').version")
+          tag="firefox-v${version}"
+
+          if [[ "$GITHUB_REF" == refs/tags/* && "$GITHUB_REF_NAME" != "$tag" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME implies a different version than manifest.json ($version)."
+            echo "::error::Bump the version in manifest.json and re-tag."
+            exit 1
+          fi
+
+          # AMO refuses a version it has already signed, so an existing tag or
+          # release means there is nothing new to ship.
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1 \
+             && [[ "$GITHUB_REF" != refs/tags/* ]]; then
+            echo "Version ${version} is already released as ${tag}; nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      # web-ext sign would fail anyway, but not until after a build, and with a
+      # stack trace rather than an explanation.
+      - name: Check AMO credentials are configured
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+        run: |
+          if [ -z "$WEB_EXT_API_KEY" ] || [ -z "$WEB_EXT_API_SECRET" ]; then
+            echo "::error::WEB_EXT_API_KEY / WEB_EXT_API_SECRET are not set. Create an API"
+            echo "::error::credential at https://addons.mozilla.org/developers/addon/api/key/"
+            echo "::error::and add both as repository secrets."
+            exit 1
+          fi
+
+      - name: Lint
+        if: steps.ver.outputs.skip != 'true'
+        run: npx --yes web-ext@8 lint --source-dir .
+
+      - name: Sign with AMO
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+        run: |
+          npx --yes web-ext@8 sign \
+            --source-dir . \
+            --artifacts-dir dist \
+            --channel "$CHANNEL" \
+            --api-key "$WEB_EXT_API_KEY" \
+            --api-secret "$WEB_EXT_API_SECRET"
+
+      # `--channel listed` hands distribution to addons.mozilla.org and returns
+      # no file to publish, so only the unlisted flow produces a release asset.
+      - name: Locate the signed .xpi
+        if: steps.ver.outputs.skip != 'true'
+        id: xpi
+        run: |
+          xpi=$(find dist -name "*.xpi" -print -quit)
+          if [ -z "$xpi" ]; then
+            if [ "$CHANNEL" = "listed" ]; then
+              echo "Submitted to AMO for review; the listing is distributed from addons.mozilla.org."
+              echo "found=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::web-ext reported success but produced no .xpi."
+            exit 1
+          fi
+          echo "path=$xpi" >> "$GITHUB_OUTPUT"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload signed .xpi as a build artifact
+        if: steps.ver.outputs.skip != 'true' && steps.xpi.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: no-shorts-firefox-xpi
+          path: ${{ steps.xpi.outputs.path }}
+
+      # `--target` lets the release create its own tag from the commit being
+      # built, so no separately pushed tag is needed. When the run *was*
+      # triggered by a pushed tag the tag already exists and is used as-is.
+      - name: Publish GitHub release
+        if: steps.ver.outputs.skip != 'true' && steps.xpi.outputs.found == 'true'
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          asset="no-shorts-for-youtube-${TAG}.xpi"
+          cp "${{ steps.xpi.outputs.path }}" "$asset"
+          gh release create "$TAG" "$asset" \
+            --target "$GITHUB_SHA" \
+            --title "Firefox ${TAG#firefox-}" \
+            --generate-notes

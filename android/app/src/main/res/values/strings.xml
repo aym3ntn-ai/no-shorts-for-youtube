@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">No Shorts</string>
+    <string name="service_label">No Shorts for YouTube</string>
+    <string name="tile_label">No Shorts</string>
+    <string name="link_trap_label">Discard Shorts link</string>
+
+    <string name="service_summary">Closes the Shorts player in the YouTube app.</string>
+    <string name="service_description">Watches the YouTube app for the Shorts player and immediately navigates back when it opens. Reads on-screen view ids from the YouTube app only; nothing is recorded or sent anywhere.</string>
+
+    <string name="status_active">Blocking is active</string>
+    <string name="status_service_off">Accessibility service is off</string>
+    <string name="status_paused">Blocking is paused</string>
+    <string name="status_service_off_detail">No Shorts needs the accessibility service to see when the Shorts player opens. Nothing is blocked until you turn it on.</string>
+    <string name="status_active_detail">Open Shorts in the YouTube app and it will close itself.</string>
+    <string name="status_paused_detail">The service is running but blocking is switched off below.</string>
+    <string name="status_no_youtube">The YouTube app doesn\'t appear to be installed on this phone.</string>
+    <string name="open_accessibility_settings">Open accessibility settings</string>
+
+    <string name="setting_enabled">Block Shorts</string>
+    <string name="setting_enabled_summary">Close the Shorts player as soon as it opens.</string>
+    <string name="setting_toast">Show a message when something is blocked</string>
+    <string name="setting_aggressive">Aggressive detection</string>
+    <string name="setting_aggressive_summary">Also block when a screen merely looks like Shorts. Catches YouTube updates that rename things, at a small risk of false positives.</string>
+    <string name="setting_link_trap">Swallow youtube.com/shorts links</string>
+    <string name="setting_link_trap_summary">Adds No Shorts to the app chooser for Shorts links so you can discard them instead of opening YouTube.</string>
+
+    <string name="section_titles">Block videos by title</string>
+    <string name="setting_titles">Block matching watch pages</string>
+    <string name="setting_titles_summary">Leave a video whose title contains one of these. Matching is case-insensitive, one entry per line.</string>
+    <string name="hint_titles">One show or keyword per line</string>
+
+    <string name="section_advanced">Advanced</string>
+    <string name="hint_markers">Extra view id fragments, one per line</string>
+    <string name="markers_summary">If a YouTube update slips past the blocker, paste ids from the list below to teach it the new names.</string>
+    <string name="observed_title">Shorts view ids seen on this phone</string>
+    <string name="observed_empty">Nothing seen yet. Open Shorts once and come back.</string>
+    <string name="copy_ids">Copy ids</string>
+    <string name="clear_ids">Clear</string>
+    <string name="ids_copied">Copied to clipboard</string>
+
+    <plurals name="stats_format">
+        <item quantity="one">Blocked %1$d time</item>
+        <item quantity="other">Blocked %1$d times</item>
+    </plurals>
+    <string name="reset_stats">Reset</string>
+
+    <string name="toast_blocked_shorts">Shorts blocked</string>
+    <string name="toast_blocked_title">Blocked video</string>
+    <string name="toast_link_discarded">Shorts link discarded</string>
+
+    <string name="tile_unavailable">Turn on the No Shorts accessibility service first</string>
+</resources>

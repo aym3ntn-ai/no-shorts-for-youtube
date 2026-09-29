@@ -146,17 +146,18 @@ Releases. One-time setup: create an API credential at
 and add it to the repository as the secrets `WEB_EXT_API_KEY` and
 `WEB_EXT_API_SECRET`.
 
-To cut a release, bump `version` in `manifest.json`, then tag it:
+To cut a release, bump `version` in `manifest.json` and merge to `main`.
+That's all: the workflow signs the package and publishes a GitHub Release
+tagged `firefox-v<version>`, creating the tag itself. It runs whenever the
+extension's own files change on `main`, and does nothing if that version was
+already released (AMO rejects a duplicate version). To release without a
+new commit, run **Firefox Release** manually from the Actions tab. Pushing a
+`firefox-vX.Y.Z` tag by hand also works.
 
-```bash
-git tag firefox-v1.2.0
-git push origin firefox-v1.2.0
-```
-
-The workflow lints, checks the tag agrees with `manifest.json`, signs the
-package, and attaches the signed `.xpi` to a new GitHub Release. The
-`firefox-` prefix keeps these tags distinct from the Android app's `v*.*.*`
-tags, so tagging one never triggers the other's release.
+The workflow lints, checks any pushed tag agrees with `manifest.json`, signs,
+and attaches the signed `.xpi` to the release. The `firefox-` prefix keeps
+these tags distinct from the Android app's `v*.*.*` tags, so neither release
+triggers the other.
 
 By default it signs on AMO's **unlisted** channel: Mozilla signs the build but
 doesn't host it, which is what makes self-distribution from GitHub Releases

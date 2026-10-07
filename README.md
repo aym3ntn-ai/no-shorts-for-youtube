@@ -180,11 +180,12 @@ work. To instead publish the add-on publicly on addons.mozilla.org, run the
 workflow manually from the Actions tab with the `listed` channel — AMO then
 hosts and distributes it, so no `.xpi` is attached to the GitHub Release.
 
-> **Before the first submission:** the add-on's identity on AMO is the
-> `browser_specific_settings.gecko.id` in `manifest.json`, currently
-> `no-shorts@local.extension`. AMO locks that ID to the add-on permanently, so
-> if you want a namespace you actually control, change it *before* the first
-> signed release.
+> **Add-on ID:** the add-on's identity on AMO is the
+> `browser_specific_settings.gecko.id` in `manifest.json`,
+> `no-shorts-for-youtube@aym3ntn-ai.github.io`. AMO ties an ID to the account
+> that first signs it, permanently: an ID already registered by someone else
+> fails with `403 Forbidden`, and this one must not change once released, or
+> Firefox treats the new build as a different add-on.
 
 ## Contributing
 

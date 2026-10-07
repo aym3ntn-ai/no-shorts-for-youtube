@@ -15,7 +15,7 @@
 # update if the extension disappears. It is safe to run any number of times.
 set -euo pipefail
 
-ADDON_ID="no-shorts@local.extension"
+ADDON_ID="no-shorts-for-youtube@aym3ntn-ai.github.io"
 REPO="aym3ntn-ai/no-shorts-for-youtube"
 FIREFOX_APP="${FIREFOX_APP:-/Applications/Firefox.app}"
 INSTALL_DIR="${INSTALL_DIR:-/Library/Application Support/NoShortsForYouTube}"

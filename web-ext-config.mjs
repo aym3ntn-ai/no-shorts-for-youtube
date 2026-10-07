@@ -8,6 +8,7 @@ export default {
   ignoreFiles: [
     "android/**",
     ".github/**",
+    "scripts/**",
     "assets/**",
     "web-ext-artifacts/**",
     "*.md",

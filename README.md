@@ -82,6 +82,21 @@ Releases are built and signed by
 [`firefox-release.yml`](.github/workflows/firefox-release.yml); see
 [Releasing](#releasing) to cut one.
 
+### Every profile on a Mac, in one command
+
+[`scripts/install-firefox-macos.sh`](scripts/install-firefox-macos.sh) installs
+the signed extension for all Firefox profiles via an enterprise policy:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aym3ntn-ai/no-shorts-for-youtube/main/scripts/install-firefox-macos.sh | sudo bash
+```
+
+With no argument it fetches the latest signed `firefox-v*` release; pass a
+path to use a signed `.xpi` you already have
+(`sudo bash install-firefox-macos.sh ~/Downloads/x.xpi`). It refuses unsigned
+or foreign packages and never overwrites someone else's `policies.json`.
+Re-run it if a Firefox update removes the extension; `--uninstall` undoes it.
+
 ### Build it yourself
 
 ```bash
